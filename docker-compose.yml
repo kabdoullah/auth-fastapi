@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+  user_service:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - ${USER_SERVICE_PORT}:8000
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_SERVER=${MAIL_SERVER}
+  
+  # tests:
+  #   build: .
+  #   command: ["pytest"]
+  #   environment:
+  #     DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+  #   volumes:
+  #     - .:/app
+
+volumes:
+  postgres_data:
+
+
